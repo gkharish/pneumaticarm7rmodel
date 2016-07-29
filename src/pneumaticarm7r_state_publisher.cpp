@@ -3,9 +3,10 @@
 #include <sensor_msgs/JointState.h>
 #include <control_msgs/JointControllerState.h>
 #include <tf/transform_broadcaster.h>
-#include </usr/users/localuser/catkin_workspace/src/pneumaticarm7rmodel/src/shared_memory.hh>
-//#include <shared_memory.hh>
+#include </home/user/catkin_ws/src/pneumaticarm7rmodel/src/shared_memory.hh>
 
+//#include <shared_memory.hh>
+/*  
 double * shmaddr_;
 Semaphore shm_sem_;
 void InitSharedMemory()
@@ -33,7 +34,7 @@ void CloseSharedMemory()
   aof.close();
 
 }
-
+*/
 
 
 int main(int argc, char** argv) {
@@ -43,9 +44,13 @@ int main(int argc, char** argv) {
     ros::Publisher reference_pub = n.advertise<sensor_msgs::JointState>("reference_point", 1); 
     //ros::Publisher control_pub = n.advertise<control_msgs::JointControllerState>("control_value", 1);
     tf::TransformBroadcaster broadcaster;
-    ros::Rate loop_rate(100);
-    InitSharedMemory();
+        //InitSharedMemory();
     const double degree = M_PI/180;
+    const double pi = 3.14;
+    const double f = 0.2;
+    double t; unsigned int cnt = 0;
+    double dt = 100;
+    ros::Rate loop_rate(dt);
 
     // robot state
     //double tilt = 0, tinc = degree, swivel=0, angle=0, height=0, hinc=0.005;
@@ -63,6 +68,29 @@ int main(int argc, char** argv) {
     tim.nsec =0.0;
     duration.sec=0.0;
     duration.nsec =0.0;*/
+    joint_state.name.resize(7);
+    joint_state.position.resize(7);
+    joint_state.effort.resize(16);
+    joint_state.velocity.resize(1);
+    reference_point.position.resize(7);
+    joint_state.name[0] ="SA";
+    joint_state.position[0] = theta0;
+    joint_state.name[1] ="SF";
+    joint_state.position[1] = theta1;
+    joint_state.name[2] ="AR";
+    joint_state.position[2] = theta2;
+    joint_state.name[3] ="EF";
+    joint_state.position[3] = theta3;
+    joint_state.name[4] ="WA";
+    joint_state.position[4] = theta4;
+    joint_state.name[5] ="WF";
+    joint_state.position[5] = theta5;
+    joint_state.name[6] ="PS";
+    joint_state.position[6] = theta6;
+    
+    for (unsigned int i =0; i<7; i++)
+            joint_state.position[i] = 0.0;//1.0*shmaddr_[i];
+
     while (ros::ok()) {
         //update joint_state
         /*tim = ros::Time::now();
@@ -73,40 +101,21 @@ int main(int argc, char** argv) {
         //controller_value.header.stamp = ros::Time::now(); 
         reference_point.header.stamp = ros::Time::now();
 
-        joint_state.name.resize(7);
-        joint_state.position.resize(7);
-        joint_state.effort.resize(16);
-        joint_state.velocity.resize(1);
-        reference_point.position.resize(7);
-        joint_state.name[0] ="SA";
-        joint_state.position[0] = theta0;
-        joint_state.name[1] ="SF";
-        joint_state.position[1] = theta1;
-        joint_state.name[2] ="AR";
-        joint_state.position[2] = theta2;
-        joint_state.name[3] ="EF";
-        joint_state.position[3] = theta3;
-        joint_state.name[4] ="WA";
-        joint_state.position[4] = theta4;
-        joint_state.name[5] ="WF";
-        joint_state.position[5] = theta5;
-        joint_state.name[6] ="PS";
-        joint_state.position[6] = theta6;
-
-        
-        shm_sem_.Acquire();
-        for (unsigned int i =0; i<7; i++) {
-            joint_state.position[i] = shmaddr_[16+i]*3.14/180;
+                
+       // shm_sem_.Acquire();
+       /*for (unsigned int i =0; i<7; i++) {
+            joint_state.position[i] = //shmaddr_[16+i]*3.14/180;
             reference_point.position[i] = 0.0; //shmaddr_[24]*3.14/180;
-        }
-        
-       //joint_state.position[4] = shmaddr_[23]; 
+        }*/
+        t=cnt*dt;
+        joint_state.position[3] = sin(2*pi*f*t);  //shmaddr_[23]; 
+        joint_state.position[1] = 0.5*sin(2*pi*f*t);
         for (unsigned int i =0; i<16; i++)
-            joint_state.effort[i] = 1.0*shmaddr_[i];
+            joint_state.effort[i] = 0.0;//1.0*shmaddr_[i];
          //controller.set_point = 1.1; //shmaddr_[24];
-        reference_point.position[3] = shmaddr_[23]*3.14/180;
-        reference_point.position[0] = shmaddr_[24]*3.14/180;
-        shm_sem_.Release();
+        reference_point.position[3] = 1.0;//shmaddr_[23]*3.14/180;
+        reference_point.position[0] = 0.5;//shmaddr_[24]*3.14/180;
+        //shm_sem_.Release();
         //std::cout << "Joint position5 =" << jointposition5 << "\n" << endl;
 
         // update transform
@@ -131,6 +140,7 @@ int main(int argc, char** argv) {
         angle += degree/4; */
 
         // This will adjust as needed per iteration
+        cnt++;
         loop_rate.sleep();
     }
 

@@ -6,7 +6,7 @@
 #include <sys/shm.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include </usr/users/localuser/catkin_workspace/src/pneumaticarm7rmodel/src/shared_memory.hh>
+#include </home/user/catkin_ws/src/pneumaticarm7rmodel/src/shared_memory.hh>
 //#include <shared_memory.hh>
 
 struct semid_ds
