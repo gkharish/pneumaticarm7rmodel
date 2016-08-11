@@ -36,7 +36,7 @@ void CloseSharedMemory()
 }
 */
 
-
+double GetState(unsigned int idx,double t);
 int main(int argc, char** argv) {
     ros::init(argc, argv, "state_publisher");
     ros::NodeHandle n;
@@ -108,8 +108,8 @@ int main(int argc, char** argv) {
             reference_point.position[i] = 0.0; //shmaddr_[24]*3.14/180;
         }*/
         t=cnt*dt;
-        joint_state.position[3] = sin(2*pi*f*t);  //shmaddr_[23]; 
-        joint_state.position[1] = 0.5*sin(2*pi*f*t);
+        joint_state.position[3] = GetState(3,t); //sin(2*pi*f*t);  //GetState(3)  shmaddr_[23]; 
+        joint_state.position[1] = GetState(1,t); //0.5*sin(2*pi*f*t);
         for (unsigned int i =0; i<16; i++)
             joint_state.effort[i] = 0.0;//1.0*shmaddr_[i];
          //controller.set_point = 1.1; //shmaddr_[24];
@@ -146,4 +146,16 @@ int main(int argc, char** argv) {
 
 
     return 0;
+}
+
+double GetState(unsigned int idx,double t)
+
+{
+  double  pi = 3.14; double f = 0.1; 
+  double res = 0;
+
+  if(idx==3) res = sin(2*pi*f*t); 
+  if(idx==1) res = 0.5*sin(2*pi*f*t);
+
+  return(res);
 }
